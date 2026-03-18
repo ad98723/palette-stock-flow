@@ -1,0 +1,97 @@
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Building2, User, Bell, Shield } from "lucide-react";
+
+const SettingsPage = () => {
+  return (
+    <div className="space-y-6 animate-fade-in max-w-3xl">
+      <div>
+        <h1 className="text-2xl font-semibold">الإعدادات</h1>
+        <p className="text-sm text-muted-foreground mt-1">إدارة إعدادات النظام والحساب</p>
+      </div>
+
+      <Card className="card-surface">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Building2 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base">معلومات الشركة</CardTitle>
+              <CardDescription>الاسم والعنوان ومعلومات التواصل</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">اسم الشركة</label>
+              <input className="mt-1 h-10 w-full rounded-lg border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20" defaultValue="شركة مخازن برو" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
+              <input className="mt-1 h-10 w-full rounded-lg border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20" defaultValue="info@warehouespro.com" />
+            </div>
+          </div>
+          <Button>حفظ التغييرات</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="card-surface">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-accent/10">
+              <User className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <CardTitle className="text-base">الملف الشخصي</CardTitle>
+              <CardDescription>معلومات المستخدم والصلاحيات</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">الاسم</label>
+              <input className="mt-1 h-10 w-full rounded-lg border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20" defaultValue="أحمد محمد" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">الدور</label>
+              <input className="mt-1 h-10 w-full rounded-lg border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground" defaultValue="مدير المخزون" readOnly />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="card-surface">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-warning/10">
+              <Bell className="h-5 w-5 text-warning" />
+            </div>
+            <div>
+              <CardTitle className="text-base">الإشعارات</CardTitle>
+              <CardDescription>إدارة تنبيهات المخزون والنظام</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <label className="flex items-center justify-between">
+            <span className="text-sm">تنبيه عند انخفاض المخزون</span>
+            <input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-primary" />
+          </label>
+          <label className="flex items-center justify-between">
+            <span className="text-sm">تنبيه عند نفاد المخزون</span>
+            <input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-primary" />
+          </label>
+          <label className="flex items-center justify-between">
+            <span className="text-sm">تقرير يومي بالبريد</span>
+            <input type="checkbox" className="h-4 w-4 rounded accent-primary" />
+          </label>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default SettingsPage;
