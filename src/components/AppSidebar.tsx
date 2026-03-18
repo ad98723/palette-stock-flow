@@ -39,16 +39,16 @@ export function AppSidebar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <Sidebar collapsible="icon" className="border-l-0 border-r">
-      <SidebarHeader className="p-4">
+    <Sidebar collapsible="icon" side="right">
+      <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary">
             <Warehouse className="h-5 w-5 text-primary-foreground" />
           </div>
           {!collapsed && (
-            <div>
-              <h2 className="text-sm font-semibold text-foreground">مخازن برو</h2>
-              <p className="text-xs text-muted-foreground">إدارة المخزون</p>
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-sidebar-foreground truncate">مخازن برو</h2>
+              <p className="text-xs text-muted-foreground truncate">إدارة المخزون</p>
             </div>
           )}
         </div>
@@ -68,10 +68,10 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end
-                      className="hover:bg-muted/50"
+                      className="hover:bg-sidebar-accent/50"
                       activeClassName="bg-primary/10 text-primary font-medium"
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -94,10 +94,10 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end
-                      className="hover:bg-muted/50"
+                      className="hover:bg-sidebar-accent/50"
                       activeClassName="bg-primary/10 text-primary font-medium"
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
