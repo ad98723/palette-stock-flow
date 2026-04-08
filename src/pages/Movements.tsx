@@ -61,7 +61,8 @@ const initialMovements: Movement[] = [
   { id: 30, product: "ميزان حرارة رقمي", type: "وارد", qty: 25, warehouse: "مستودع أ", user: "نورة أحمد", date: "2026-03-29", time: "13:15", notes: "" },
 ];
 
-const emptyMovement = { product: productNames[0], type: "وارد" as const, qty: 1, warehouse: "مستودع أ", user: users[0], date: new Date().toISOString().split("T")[0], time: new Date().toTimeString().slice(0, 5), notes: "" };
+type MovementForm = { product: string; type: "وارد" | "صادر"; qty: number; warehouse: string; user: string; date: string; time: string; notes: string };
+const emptyMovement: MovementForm = { product: productNames[0], type: "وارد", qty: 1, warehouse: "مستودع أ", user: users[0], date: new Date().toISOString().split("T")[0], time: new Date().toTimeString().slice(0, 5), notes: "" };
 
 const Movements = () => {
   const [movements, setMovements] = useState<Movement[]>(initialMovements);
