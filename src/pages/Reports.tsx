@@ -231,8 +231,8 @@ const Reports = () => {
       {/* Chart 1: Monthly Bar Chart */}
       <Card className="card-surface">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold">1. حركة المخزون الشهرية</CardTitle>
-          <p className="text-xs text-muted-foreground">مقارنة الوارد والصادر والصافي خلال 12 شهر</p>
+          <CardTitle className="text-base font-semibold">1. {t.chart1}</CardTitle>
+          <p className="text-xs text-muted-foreground">{t.chart1Desc}</p>
         </CardHeader>
         <CardContent>
           <div className="h-80">
@@ -242,9 +242,9 @@ const Reports = () => {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="وارد" fill="hsl(221,83%,53%)" radius={[4,4,0,0]} />
-                <Bar dataKey="صادر" fill="hsl(199,89%,48%)" radius={[4,4,0,0]} />
-                <Bar dataKey="صافي" fill="hsl(142,71%,45%)" radius={[4,4,0,0]} />
+                <Bar dataKey={KIN} fill="hsl(221,83%,53%)" radius={[4,4,0,0]} />
+                <Bar dataKey={KOUT} fill="hsl(199,89%,48%)" radius={[4,4,0,0]} />
+                <Bar dataKey={KNET} fill="hsl(142,71%,45%)" radius={[4,4,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -255,8 +255,8 @@ const Reports = () => {
         {/* Chart 2: Inventory Value Line */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">2. تطور قيمة المخزون</CardTitle>
-            <p className="text-xs text-muted-foreground">القيمة الإجمالية بالريال خلال السنة</p>
+            <CardTitle className="text-base font-semibold">2. {t.chart2}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart2Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -271,7 +271,7 @@ const Reports = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214,32%,91%)" />
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toLocaleString()} ر.س`, "القيمة"]} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toLocaleString()} ${sar}`, t.inventoryValue]} />
                   <Area type="monotone" dataKey="value" stroke="hsl(221,83%,53%)" strokeWidth={2.5} fill="url(#valueGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -282,8 +282,8 @@ const Reports = () => {
         {/* Chart 3: Warehouse Pie */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">3. توزيع المستودعات</CardTitle>
-            <p className="text-xs text-muted-foreground">نسبة المخزون في كل مستودع</p>
+            <CardTitle className="text-base font-semibold">3. {t.chart3}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart3Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-48">
@@ -292,7 +292,7 @@ const Reports = () => {
                   <Pie data={warehouseData} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value">
                     {warehouseData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
                   </Pie>
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}%`, "النسبة"]} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}%`, t.share]} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -310,8 +310,8 @@ const Reports = () => {
         {/* Chart 4: Category Distribution */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">4. توزيع الفئات</CardTitle>
-            <p className="text-xs text-muted-foreground">نسبة كل فئة من إجمالي المخزون</p>
+            <CardTitle className="text-base font-semibold">4. {t.chart4}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart4Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -320,7 +320,7 @@ const Reports = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214,32%,91%)" />
                   <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" width={90} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}%`, "النسبة"]} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}%`, t.share]} />
                   <Bar dataKey="value" radius={[0,4,4,0]}>
                     {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Bar>
@@ -333,8 +333,8 @@ const Reports = () => {
         {/* Chart 5: Turnover Rate */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">5. معدل دوران المخزون</CardTitle>
-            <p className="text-xs text-muted-foreground">تطور معدل الدوران شهرياً</p>
+            <CardTitle className="text-base font-semibold">5. {t.chart5}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart5Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -343,8 +343,8 @@ const Reports = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214,32%,91%)" />
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}x`, "المعدل"]} />
-                  <Line type="monotone" dataKey="معدل" stroke="hsl(142,71%,45%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(142,71%,45%)" }} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}x`, t.rate]} />
+                  <Line type="monotone" dataKey={KRATE} stroke="hsl(142,71%,45%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(142,71%,45%)" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -354,8 +354,8 @@ const Reports = () => {
         {/* Chart 6: Radar - Performance */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">6. مؤشرات الأداء</CardTitle>
-            <p className="text-xs text-muted-foreground">تقييم شامل لأداء إدارة المخزون</p>
+            <CardTitle className="text-base font-semibold">6. {t.chart6}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart6Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -364,7 +364,7 @@ const Reports = () => {
                   <PolarGrid stroke="hsl(214,32%,91%)" />
                   <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10 }} stroke="hsl(215,16%,47%)" />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} />
-                  <Radar name="الأداء" dataKey="A" stroke="hsl(221,83%,53%)" fill="hsl(221,83%,53%)" fillOpacity={0.2} strokeWidth={2} />
+                  <Radar name={t.performance} dataKey="A" stroke="hsl(221,83%,53%)" fill="hsl(221,83%,53%)" fillOpacity={0.2} strokeWidth={2} />
                   <Tooltip contentStyle={tooltipStyle} />
                 </RadarChart>
               </ResponsiveContainer>
@@ -375,8 +375,8 @@ const Reports = () => {
         {/* Chart 7: Stock Status Donut */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">7. حالة المخزون</CardTitle>
-            <p className="text-xs text-muted-foreground">توزيع المنتجات حسب حالة التوفر</p>
+            <CardTitle className="text-base font-semibold">7. {t.chart7}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart7Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-48">
@@ -385,7 +385,7 @@ const Reports = () => {
                   <Pie data={stockStatus} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={4} dataKey="value">
                     {stockStatus.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                   </Pie>
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value} منتج`, "العدد"]} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value} ${t.item}`, t.count]} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -393,7 +393,7 @@ const Reports = () => {
               {stockStatus.map((s) => (
                 <div key={s.name} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-full" style={{ background: s.fill }} /><span className="text-muted-foreground">{s.name}</span></div>
-                  <span className="tabular-nums font-medium">{s.value} منتج</span>
+                  <span className="tabular-nums font-medium">{s.value} {t.item}</span>
                 </div>
               ))}
             </div>
@@ -403,8 +403,8 @@ const Reports = () => {
         {/* Chart 8: Daily Movements */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">8. الحركة اليومية</CardTitle>
-            <p className="text-xs text-muted-foreground">توزيع الحركات حسب أيام الأسبوع</p>
+            <CardTitle className="text-base font-semibold">8. {t.chart8}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart8Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -424,8 +424,8 @@ const Reports = () => {
                   <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Area type="monotone" dataKey="وارد" stroke="hsl(221,83%,53%)" fill="url(#dayIn)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="صادر" stroke="hsl(199,89%,48%)" fill="url(#dayOut)" strokeWidth={2} />
+                  <Area type="monotone" dataKey={KIN} stroke="hsl(221,83%,53%)" fill="url(#dayIn)" strokeWidth={2} />
+                  <Area type="monotone" dataKey={KOUT} stroke="hsl(199,89%,48%)" fill="url(#dayOut)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -435,8 +435,8 @@ const Reports = () => {
         {/* Chart 9: Top Products */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">9. أعلى المنتجات مبيعاً</CardTitle>
-            <p className="text-xs text-muted-foreground">حسب عدد الوحدات المباعة</p>
+            <CardTitle className="text-base font-semibold">9. {t.chart9}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart9Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -446,7 +446,7 @@ const Reports = () => {
                   <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} stroke="hsl(215,16%,47%)" width={85} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="مبيعات" fill="hsl(221,83%,53%)" radius={[0,4,4,0]} />
+                  <Bar dataKey={KSALES} fill="hsl(221,83%,53%)" radius={[0,4,4,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -456,8 +456,8 @@ const Reports = () => {
         {/* Chart 10: User Performance */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">10. أداء الموظفين</CardTitle>
-            <p className="text-xs text-muted-foreground">عدد الحركات المسجلة لكل موظف</p>
+            <CardTitle className="text-base font-semibold">10. {t.chart10}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart10Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -467,7 +467,7 @@ const Reports = () => {
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(215,16%,47%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="حركات" radius={[4,4,0,0]}>
+                  <Bar dataKey={KMOV} radius={[4,4,0,0]}>
                     {userPerformance.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Bar>
                 </BarChart>
@@ -479,8 +479,8 @@ const Reports = () => {
         {/* Chart 11: Revenue by Product */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">11. الإيرادات حسب المنتج</CardTitle>
-            <p className="text-xs text-muted-foreground">مقارنة إيرادات أعلى المنتجات</p>
+            <CardTitle className="text-base font-semibold">11. {t.chart11}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart11Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -489,9 +489,9 @@ const Reports = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214,32%,91%)" />
                   <XAxis dataKey="name" tick={{ fontSize: 9 }} stroke="hsl(215,16%,47%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toLocaleString()} ر.س`, "الإيرادات"]} />
-                  <Bar dataKey="إيرادات" fill="hsl(38,92%,50%)" radius={[4,4,0,0]} fillOpacity={0.8} />
-                  <Line type="monotone" dataKey="إيرادات" stroke="hsl(0,84%,60%)" strokeWidth={2} dot={false} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value.toLocaleString()} ${sar}`, KREV]} />
+                  <Bar dataKey={KREV} fill="hsl(38,92%,50%)" radius={[4,4,0,0]} fillOpacity={0.8} />
+                  <Line type="monotone" dataKey={KREV} stroke="hsl(0,84%,60%)" strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -501,8 +501,8 @@ const Reports = () => {
         {/* Chart 12: Monthly Comparison Composed */}
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">12. تحليل مقارن شهري</CardTitle>
-            <p className="text-xs text-muted-foreground">الوارد والصادر مع خط الاتجاه</p>
+            <CardTitle className="text-base font-semibold">12. {t.chart12}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.chart12Desc}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -512,9 +512,9 @@ const Reports = () => {
                   <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="hsl(215,16%,47%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215,16%,47%)" />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Area type="monotone" dataKey="وارد" fill="hsl(221,83%,53%)" fillOpacity={0.1} stroke="hsl(221,83%,53%)" strokeWidth={2} />
-                  <Bar dataKey="صادر" fill="hsl(199,89%,48%)" radius={[4,4,0,0]} fillOpacity={0.7} />
-                  <Line type="monotone" dataKey="صافي" stroke="hsl(142,71%,45%)" strokeWidth={2.5} dot={{ r: 3, fill: "hsl(142,71%,45%)" }} />
+                  <Area type="monotone" dataKey={KIN} fill="hsl(221,83%,53%)" fillOpacity={0.1} stroke="hsl(221,83%,53%)" strokeWidth={2} />
+                  <Bar dataKey={KOUT} fill="hsl(199,89%,48%)" radius={[4,4,0,0]} fillOpacity={0.7} />
+                  <Line type="monotone" dataKey={KNET} stroke="hsl(142,71%,45%)" strokeWidth={2.5} dot={{ r: 3, fill: "hsl(142,71%,45%)" }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
