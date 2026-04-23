@@ -1,10 +1,6 @@
 export type Language = "ar" | "en";
 
-type Dict = {
-  [key: string]: string | string[] | Record<string, string>;
-};
-
-export const translations: Record<Language, Dict> = {
+const ar = {
   ar: {
     // Common
     appName: "مخازن برو",
