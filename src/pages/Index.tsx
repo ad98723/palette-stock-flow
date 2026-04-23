@@ -1,24 +1,18 @@
 import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useLang } from "@/contexts/LanguageContext";
 
-const kpis = [
-  { title: "إجمالي المنتجات", value: "2,847", change: "+12%", up: true, icon: Package, color: "text-primary" },
-  { title: "قيمة المخزون", value: "345,600 ر.س", change: "+8.2%", up: true, icon: DollarSign, color: "text-success" },
-  { title: "منتجات منخفضة", value: "23", change: "-5", up: false, icon: AlertTriangle, color: "text-warning" },
-  { title: "معدل الدوران", value: "4.2x", change: "+0.3", up: true, icon: TrendingUp, color: "text-accent" },
+const inventoryTrendRaw = [
+  { month: "يناير", in: 420, out: 310 },
+  { month: "فبراير", in: 380, out: 290 },
+  { month: "مارس", in: 510, out: 400 },
+  { month: "أبريل", in: 470, out: 380 },
+  { month: "مايو", in: 530, out: 420 },
+  { month: "يونيو", in: 600, out: 480 },
 ];
 
-const inventoryTrend = [
-  { month: "يناير", وارد: 420, صادر: 310 },
-  { month: "فبراير", وارد: 380, صادر: 290 },
-  { month: "مارس", وارد: 510, صادر: 400 },
-  { month: "أبريل", وارد: 470, صادر: 380 },
-  { month: "مايو", وارد: 530, صادر: 420 },
-  { month: "يونيو", وارد: 600, صادر: 480 },
-];
-
-const categoryData = [
+const categoryDataRaw = [
   { name: "إلكترونيات", value: 35 },
   { name: "أثاث", value: 25 },
   { name: "مواد غذائية", value: 20 },
@@ -34,7 +28,7 @@ const COLORS = [
   "hsl(215, 16%, 47%)",
 ];
 
-const recentMovements = [
+const recentMovementsRaw = [
   { id: 1, product: "شاشة سامسونج 55 بوصة", type: "وارد", qty: 45, warehouse: "مستودع أ", date: "منذ 12 دقيقة" },
   { id: 2, product: "لابتوب ديل XPS 15", type: "صادر", qty: 12, warehouse: "مستودع ب", date: "منذ 34 دقيقة" },
   { id: 3, product: "طابعة HP LaserJet", type: "وارد", qty: 30, warehouse: "مستودع أ", date: "منذ ساعة" },
@@ -43,11 +37,29 @@ const recentMovements = [
 ];
 
 const Index = () => {
+  const { t, lang, dir, tMonth, tCategory, tProduct, tWarehouse, tType, tRelTime } = useLang();
+  const align = dir === "rtl" ? "text-right" : "text-left";
+  const sar = lang === "ar" ? "ر.س" : "SAR";
+
+  const kpis = [
+    { title: t.totalProducts, value: "2,847", change: "+12%", up: true, icon: Package, color: "text-primary" },
+    { title: t.inventoryValue, value: `345,600 ${sar}`, change: "+8.2%", up: true, icon: DollarSign, color: "text-success" },
+    { title: t.lowStock, value: "23", change: "-5", up: false, icon: AlertTriangle, color: "text-warning" },
+    { title: t.turnoverRate, value: "4.2x", change: "+0.3", up: true, icon: TrendingUp, color: "text-accent" },
+  ];
+
+  const inventoryTrend = inventoryTrendRaw.map((m) => ({
+    month: tMonth(m.month),
+    [t.inbound]: m.in,
+    [t.outbound]: m.out,
+  }));
+  const categoryData = categoryDataRaw.map((c) => ({ name: tCategory(c.name), value: c.value }));
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">لوحة التحكم</h1>
-        <p className="text-sm text-muted-foreground mt-1">نظرة عامة على حالة المخزون — آخر تحديث: منذ 12 ثانية</p>
+        <h1 className="text-2xl font-semibold text-foreground">{t.dashboard}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t.dashboardSubtitle}</p>
       </div>
 
       {/* KPI Cards */}
@@ -71,7 +83,7 @@ const Index = () => {
                   <ArrowDownRight className="h-3.5 w-3.5 text-warning" />
                 )}
                 <span className={`font-medium ${kpi.up ? "text-success" : "text-warning"}`}>{kpi.change}</span>
-                <span className="text-muted-foreground">مقارنة بالشهر السابق</span>
+                <span className="text-muted-foreground">{t.vsLastMonth}</span>
               </div>
             </CardContent>
           </Card>
@@ -82,8 +94,8 @@ const Index = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="card-surface xl:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">حركة المخزون</CardTitle>
-            <p className="text-xs text-muted-foreground">الوارد والصادر خلال الأشهر الستة الأخيرة</p>
+            <CardTitle className="text-sm font-semibold">{t.inventoryMovement}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.inOutLast6}</p>
           </CardHeader>
           <CardContent>
             <div className="h-64 w-full">
@@ -111,19 +123,19 @@ const Index = () => {
                       boxShadow: "0 4px 12px rgb(0 0 0 / 0.08)",
                     }}
                   />
-                  <Area type="monotone" dataKey="وارد" stroke="hsl(221, 83%, 53%)" strokeWidth={2} fill="url(#colorIn)" />
-                  <Area type="monotone" dataKey="صادر" stroke="hsl(199, 89%, 48%)" strokeWidth={2} fill="url(#colorOut)" />
+                  <Area type="monotone" dataKey={t.inbound} stroke="hsl(221, 83%, 53%)" strokeWidth={2} fill="url(#colorIn)" />
+                  <Area type="monotone" dataKey={t.outbound} stroke="hsl(199, 89%, 48%)" strokeWidth={2} fill="url(#colorOut)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
             <div className="flex items-center justify-center gap-6 mt-3">
               <div className="flex items-center gap-2 text-xs">
                 <div className="h-2 w-6 rounded-full bg-primary" />
-                <span className="text-muted-foreground">وارد</span>
+                <span className="text-muted-foreground">{t.inbound}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <div className="h-2 w-6 rounded-full bg-accent" />
-                <span className="text-muted-foreground">صادر</span>
+                <span className="text-muted-foreground">{t.outbound}</span>
               </div>
             </div>
           </CardContent>
@@ -131,8 +143,8 @@ const Index = () => {
 
         <Card className="card-surface">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">توزيع الفئات</CardTitle>
-            <p className="text-xs text-muted-foreground">نسبة كل فئة من المخزون</p>
+            <CardTitle className="text-sm font-semibold">{t.categoryDistribution}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t.categoryShare}</p>
           </CardHeader>
           <CardContent>
             <div className="h-44 w-full">
@@ -158,7 +170,7 @@ const Index = () => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [`${value}%`, "النسبة"]}
+                    formatter={(value: number) => [`${value}%`, t.share]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -181,25 +193,25 @@ const Index = () => {
       {/* Recent Movements */}
       <Card className="card-surface">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold">آخر الحركات</CardTitle>
-          <p className="text-xs text-muted-foreground">أحدث عمليات الوارد والصادر</p>
+          <CardTitle className="text-sm font-semibold">{t.recentMovements}</CardTitle>
+          <p className="text-xs text-muted-foreground">{t.recentMovementsDesc}</p>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="table-header-bg border-b">
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground text-xs">المنتج</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground text-xs">النوع</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground text-xs">الكمية</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground text-xs hidden sm:table-cell">المستودع</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground text-xs">الوقت</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground text-xs`}>{t.product}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground text-xs`}>{t.type}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground text-xs`}>{t.qty}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground text-xs hidden sm:table-cell`}>{t.warehouse}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground text-xs`}>{t.time}</th>
                 </tr>
               </thead>
               <tbody>
-                {recentMovements.map((m) => (
+                {recentMovementsRaw.map((m) => (
                   <tr key={m.id} className="border-b border-border/40 hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-medium text-sm">{m.product}</td>
+                    <td className="py-3 px-4 font-medium text-sm">{tProduct(m.product)}</td>
                     <td className="py-3 px-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
@@ -208,12 +220,12 @@ const Index = () => {
                             : "bg-accent/10 text-accent"
                         }`}
                       >
-                        {m.type}
+                        {tType(m.type)}
                       </span>
                     </td>
                     <td className="py-3 px-4 tabular-nums font-medium">{m.qty}</td>
-                    <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">{m.warehouse}</td>
-                    <td className="py-3 px-4 text-muted-foreground text-xs">{m.date}</td>
+                    <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">{tWarehouse(m.warehouse)}</td>
+                    <td className="py-3 px-4 text-muted-foreground text-xs">{tRelTime(m.date)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useLang } from "@/contexts/LanguageContext";
 
 interface Product {
   id: number;
@@ -59,9 +60,12 @@ const initialProducts: Product[] = [
 const emptyProduct: Omit<Product, "id"> = { name: "", sku: "", category: "إلكترونيات", qty: 0, minQty: 10, price: 0, warehouse: "مستودع أ" };
 
 const Products = () => {
+  const { t, lang, dir, tCategory, tWarehouse, tProduct, tStatus } = useLang();
+  const align = dir === "rtl" ? "text-right" : "text-left";
+  const sar = lang === "ar" ? "ر.س" : "SAR";
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("الكل");
+  const [categoryFilter, setCategoryFilter] = useState<string>("__all__");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -69,8 +73,13 @@ const Products = () => {
   const [form, setForm] = useState<Omit<Product, "id">>(emptyProduct);
 
   const filtered = products.filter((p) => {
-    const matchSearch = p.name.includes(search) || p.sku.toLowerCase().includes(search.toLowerCase());
-    const matchCat = categoryFilter === "الكل" || p.category === categoryFilter;
+    const q = search.toLowerCase();
+    const translatedName = tProduct(p.name).toLowerCase();
+    const matchSearch =
+      p.name.toLowerCase().includes(q) ||
+      translatedName.includes(q) ||
+      p.sku.toLowerCase().includes(q);
+    const matchCat = categoryFilter === "__all__" || p.category === categoryFilter;
     return matchSearch && matchCat;
   });
 
@@ -79,14 +88,14 @@ const Products = () => {
   const openDelete = (p: Product) => { setDeleteTarget(p); setDeleteDialogOpen(true); };
 
   const handleSave = () => {
-    if (!form.name.trim() || !form.sku.trim()) { toast.error("يرجى ملء جميع الحقول المطلوبة"); return; }
+    if (!form.name.trim() || !form.sku.trim()) { toast.error(t.fillRequired); return; }
     if (editingProduct) {
       setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...form } : p));
-      toast.success("تم تعديل المنتج بنجاح");
+      toast.success(t.productEdited);
     } else {
       const newId = Math.max(...products.map(p => p.id), 0) + 1;
       setProducts(prev => [{ id: newId, ...form }, ...prev]);
-      toast.success("تمت إضافة المنتج بنجاح");
+      toast.success(t.productAdded);
     }
     setDialogOpen(false);
   };
@@ -94,7 +103,7 @@ const Products = () => {
   const handleDelete = () => {
     if (deleteTarget) {
       setProducts(prev => prev.filter(p => p.id !== deleteTarget.id));
-      toast.success("تم حذف المنتج بنجاح");
+      toast.success(t.productDeleted);
     }
     setDeleteDialogOpen(false);
   };
@@ -105,12 +114,12 @@ const Products = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">المنتجات</h1>
-          <p className="text-sm text-muted-foreground mt-1">إدارة وتتبع جميع المنتجات في المخزون ({products.length} منتج)</p>
+          <h1 className="text-2xl font-semibold">{t.products}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t.productsSubtitle} ({products.length} {t.item})</p>
         </div>
         <Button className="gap-2" onClick={openAdd}>
           <Plus className="h-4 w-4" />
-          إضافة منتج
+          {t.addProduct}
         </Button>
       </div>
 
@@ -118,34 +127,34 @@ const Products = () => {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card className="card-surface"><CardContent className="p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10"><Package className="h-5 w-5 text-primary" /></div>
-          <div><p className="text-xs text-muted-foreground">إجمالي المنتجات</p><p className="text-lg font-semibold tabular-nums">{products.length}</p></div>
+          <div><p className="text-xs text-muted-foreground">{t.totalProducts}</p><p className="text-lg font-semibold tabular-nums">{products.length}</p></div>
         </CardContent></Card>
         <Card className="card-surface"><CardContent className="p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-success/10"><Package className="h-5 w-5 text-success" /></div>
-          <div><p className="text-xs text-muted-foreground">قيمة المخزون</p><p className="text-lg font-semibold tabular-nums">{totalValue.toLocaleString()} ر.س</p></div>
+          <div><p className="text-xs text-muted-foreground">{t.inventoryValue}</p><p className="text-lg font-semibold tabular-nums">{totalValue.toLocaleString()} {sar}</p></div>
         </CardContent></Card>
         <Card className="card-surface"><CardContent className="p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-warning/10"><Package className="h-5 w-5 text-warning" /></div>
-          <div><p className="text-xs text-muted-foreground">منخفض المخزون</p><p className="text-lg font-semibold tabular-nums">{products.filter(p => getStatus(p) === "منخفض").length}</p></div>
+          <div><p className="text-xs text-muted-foreground">{t.lowStockCount}</p><p className="text-lg font-semibold tabular-nums">{products.filter(p => getStatus(p) === "منخفض").length}</p></div>
         </CardContent></Card>
         <Card className="card-surface"><CardContent className="p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-destructive/10"><Package className="h-5 w-5 text-destructive" /></div>
-          <div><p className="text-xs text-muted-foreground">نفد من المخزون</p><p className="text-lg font-semibold tabular-nums">{products.filter(p => getStatus(p) === "نفد").length}</p></div>
+          <div><p className="text-xs text-muted-foreground">{t.outOfStockCount}</p><p className="text-lg font-semibold tabular-nums">{products.filter(p => getStatus(p) === "نفد").length}</p></div>
         </CardContent></Card>
       </div>
 
       {/* Search & Filter */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input type="text" placeholder="بحث بالاسم أو الرمز..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full rounded-lg border bg-card pr-9 pl-4 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+          <Search className={`absolute ${dir === "rtl" ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+          <input type="text" placeholder={t.searchProductPlaceholder} value={search} onChange={(e) => setSearch(e.target.value)}
+            className={`h-10 w-full rounded-lg border bg-card ${dir === "rtl" ? "pr-9 pl-4" : "pl-9 pr-4"} text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all`} />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-[160px] gap-2"><Filter className="h-4 w-4" /><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="الكل">كل الفئات</SelectItem>
-            {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            <SelectItem value="__all__">{t.allCategories}</SelectItem>
+            {categories.map(c => <SelectItem key={c} value={c}>{tCategory(c)}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -157,14 +166,14 @@ const Products = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="table-header-bg">
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">المنتج</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">الرمز</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">الفئة</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">المستودع</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">الكمية</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">السعر</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">الحالة</th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">إجراءات</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.product}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.code}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.category}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.warehouse}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.qty}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.price}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.status}</th>
+                  <th className={`${align} py-3 px-4 font-medium text-muted-foreground`}>{t.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -172,16 +181,16 @@ const Products = () => {
                   const status = getStatus(p);
                   return (
                     <tr key={p.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                      <td className="py-3 px-4 font-medium">{p.name}</td>
+                      <td className="py-3 px-4 font-medium">{tProduct(p.name)}</td>
                       <td className="py-3 px-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{p.category}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{p.warehouse}</td>
+                      <td className="py-3 px-4 text-muted-foreground">{tCategory(p.category)}</td>
+                      <td className="py-3 px-4 text-muted-foreground">{tWarehouse(p.warehouse)}</td>
                       <td className="py-3 px-4 tabular-nums">{p.qty}</td>
-                      <td className="py-3 px-4 tabular-nums">{p.price.toLocaleString()} ر.س</td>
+                      <td className="py-3 px-4 tabular-nums">{p.price.toLocaleString()} {sar}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           status === "متوفر" ? "bg-success/10 text-success" : status === "منخفض" ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-                        }`}>{status}</span>
+                        }`}>{tStatus(status)}</span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1">
@@ -201,46 +210,46 @@ const Products = () => {
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editingProduct ? "تعديل منتج" : "إضافة منتج جديد"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editingProduct ? t.editProduct : t.addNewProduct}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2">
-              <label className="text-sm font-medium mb-1.5 block">اسم المنتج *</label>
-              <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="أدخل اسم المنتج" />
+              <label className="text-sm font-medium mb-1.5 block">{t.productName} *</label>
+              <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t.productNamePlaceholder} />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">الرمز (SKU) *</label>
+              <label className="text-sm font-medium mb-1.5 block">{t.sku} *</label>
               <Input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="ELC-001" />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">الفئة</label>
+              <label className="text-sm font-medium mb-1.5 block">{t.category}</label>
               <Select value={form.category} onValueChange={v => setForm({ ...form, category: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{tCategory(c)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">المستودع</label>
+              <label className="text-sm font-medium mb-1.5 block">{t.warehouse}</label>
               <Select value={form.warehouse} onValueChange={v => setForm({ ...form, warehouse: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{warehouses.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}</SelectContent>
+                <SelectContent>{warehouses.map(w => <SelectItem key={w} value={w}>{tWarehouse(w)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">السعر (ر.س)</label>
+              <label className="text-sm font-medium mb-1.5 block">{t.priceSar.replace("ر.س", sar).replace("SAR", sar)}</label>
               <Input type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">الكمية</label>
+              <label className="text-sm font-medium mb-1.5 block">{t.qty}</label>
               <Input type="number" value={form.qty} onChange={e => setForm({ ...form, qty: Number(e.target.value) })} />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">الحد الأدنى</label>
+              <label className="text-sm font-medium mb-1.5 block">{t.minQty}</label>
               <Input type="number" value={form.minQty} onChange={e => setForm({ ...form, minQty: Number(e.target.value) })} />
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>إلغاء</Button>
-            <Button onClick={handleSave}>{editingProduct ? "حفظ التعديلات" : "إضافة"}</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t.cancel}</Button>
+            <Button onClick={handleSave}>{editingProduct ? t.saveChanges : t.add}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -248,11 +257,11 @@ const Products = () => {
       {/* Delete Confirmation */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>تأكيد الحذف</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground py-2">هل أنت متأكد من حذف المنتج <strong>"{deleteTarget?.name}"</strong>؟ لا يمكن التراجع عن هذا الإجراء.</p>
+          <DialogHeader><DialogTitle>{t.confirmDelete}</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground py-2">{t.confirmDeleteProduct} <strong>"{deleteTarget ? tProduct(deleteTarget.name) : ""}"</strong>؟ {t.cannotUndo}</p>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>إلغاء</Button>
-            <Button variant="destructive" onClick={handleDelete}>حذف</Button>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>{t.cancel}</Button>
+            <Button variant="destructive" onClick={handleDelete}>{t.delete}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

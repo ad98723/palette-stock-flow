@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLang } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { Warehouse, Eye, EyeOff, LogIn } from "lucide-react";
+import { Warehouse, Eye, EyeOff, LogIn, Languages } from "lucide-react";
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const { t, lang, dir, toggle } = useLang();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +18,7 @@ const LoginPage = () => {
     setError("");
 
     if (!username.trim() || !password.trim()) {
-      setError("يرجى إدخال اسم المستخدم وكلمة المرور");
+      setError(t.fillCreds);
       return;
     }
 
@@ -24,58 +26,62 @@ const LoginPage = () => {
     setTimeout(() => {
       const success = login(username.trim(), password);
       if (!success) {
-        setError("اسم المستخدم أو كلمة المرور غير صحيحة");
+        setError(t.invalidCreds);
       }
       setLoading(false);
     }, 600);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative" dir={dir}>
+      <Button variant="ghost" size="sm" onClick={toggle} className="absolute top-4 end-4 gap-1.5">
+        <Languages className="h-4 w-4" />
+        <span className="text-xs uppercase">{lang === "ar" ? "EN" : "AR"}</span>
+      </Button>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary mb-4">
             <Warehouse className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">مخازن برو</h1>
-          <p className="text-sm text-muted-foreground mt-1">نظام إدارة المخزون المتكامل</p>
+          <h1 className="text-2xl font-bold text-foreground">{t.appName}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t.systemTitle}</p>
         </div>
 
         {/* Login Card */}
         <div className="card-surface p-8">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground">تسجيل الدخول</h2>
-            <p className="text-sm text-muted-foreground mt-1">أدخل بيانات الاعتماد للوصول إلى النظام</p>
+            <h2 className="text-lg font-semibold text-foreground">{t.login}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{t.loginPrompt}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">اسم المستخدم</label>
+              <label className="text-sm font-medium text-foreground">{t.username}</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="أدخل اسم المستخدم"
+                placeholder={t.usernamePlaceholder}
                 className="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-muted-foreground"
                 autoFocus
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">كلمة المرور</label>
+              <label className="text-sm font-medium text-foreground">{t.password}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="أدخل كلمة المرور"
+                  placeholder={t.passwordPlaceholder}
                   className="h-11 w-full rounded-lg border border-input bg-background pe-11 ps-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-muted-foreground"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -94,14 +100,12 @@ const LoginPage = () => {
               ) : (
                 <LogIn className="h-4 w-4" />
               )}
-              {loading ? "جاري التحقق..." : "دخول"}
+              {loading ? t.verifying : t.enter}
             </Button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          نظام إدارة المخازن — جميع الحقوق محفوظة © 2026
-        </p>
+        <p className="text-center text-xs text-muted-foreground mt-6">{t.rightsReserved}</p>
       </div>
     </div>
   );
