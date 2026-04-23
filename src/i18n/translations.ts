@@ -1,6 +1,6 @@
 export type Language = "ar" | "en";
 
-const ar = {
+const _data = {
   ar: {
     // Common
     appName: "مخازن برو",
@@ -402,9 +402,11 @@ const ar = {
       "منذ 3 ساعات": "3 hours ago",
     } as Record<string, string>,
   },
-} as const;
+};
 
-export type TranslationKey = keyof typeof translations.ar;
+type TDict = (typeof _data)["ar"];
+export const translations: Record<Language, TDict> = _data;
+export type TranslationKey = keyof TDict;
 
 // Translation map for product names (kept simple — translates known product names)
 export const productNameMap: Record<string, string> = {
