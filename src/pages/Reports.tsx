@@ -8,9 +8,10 @@ import {
   ScatterChart, Treemap, FunnelChart, Funnel, LabelList,
 } from "recharts";
 import { toast } from "sonner";
+import { useLang } from "@/contexts/LanguageContext";
 
-// Data
-const monthlyData = [
+// Data — months stored in Arabic canonical form, translated at render time
+const monthlyDataRaw = [
   { month: "يناير", وارد: 420, صادر: 310, صافي: 110 },
   { month: "فبراير", وارد: 380, صادر: 290, صافي: 90 },
   { month: "مارس", وارد: 510, صادر: 400, صافي: 110 },
@@ -25,13 +26,13 @@ const monthlyData = [
   { month: "ديسمبر", وارد: 700, صادر: 560, صافي: 140 },
 ];
 
-const warehouseData = [
+const warehouseDataRaw = [
   { name: "مستودع أ", value: 45 },
   { name: "مستودع ب", value: 30 },
   { name: "مستودع ج", value: 25 },
 ];
 
-const categoryData = [
+const categoryDataRaw = [
   { name: "إلكترونيات", value: 35 },
   { name: "أثاث", value: 15 },
   { name: "مواد غذائية", value: 18 },
@@ -44,7 +45,7 @@ const categoryData = [
 
 const COLORS = ["hsl(221,83%,53%)", "hsl(199,89%,48%)", "hsl(142,71%,45%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)", "hsl(262,83%,58%)", "hsl(330,81%,60%)", "hsl(180,60%,45%)"];
 
-const valueData = [
+const valueDataRaw = [
   { month: "يناير", value: 280000 },
   { month: "فبراير", value: 295000 },
   { month: "مارس", value: 310000 },
@@ -59,7 +60,7 @@ const valueData = [
   { month: "ديسمبر", value: 410000 },
 ];
 
-const turnoverData = [
+const turnoverDataRaw = [
   { month: "يناير", معدل: 3.2 },
   { month: "فبراير", معدل: 3.5 },
   { month: "مارس", معدل: 3.8 },
@@ -74,7 +75,7 @@ const turnoverData = [
   { month: "ديسمبر", معدل: 4.8 },
 ];
 
-const radarData = [
+const radarDataRaw = [
   { metric: "دقة المخزون", A: 92, fullMark: 100 },
   { metric: "سرعة التوريد", A: 78, fullMark: 100 },
   { metric: "معدل الدوران", A: 85, fullMark: 100 },
@@ -83,7 +84,16 @@ const radarData = [
   { metric: "كفاءة التخزين", A: 72, fullMark: 100 },
 ];
 
-const topProducts = [
+const radarMetricMap: Record<string, string> = {
+  "دقة المخزون": "Inventory Accuracy",
+  "سرعة التوريد": "Supply Speed",
+  "معدل الدوران": "Turnover",
+  "تقليل الهدر": "Waste Reduction",
+  "رضا العملاء": "Customer Satisfaction",
+  "كفاءة التخزين": "Storage Efficiency",
+};
+
+const topProductsRaw = [
   { name: "شاشة سامسونج", مبيعات: 245, إيرادات: 600250 },
   { name: "لابتوب ديل", مبيعات: 120, إيرادات: 624000 },
   { name: "طابعة HP", مبيعات: 89, إيرادات: 160200 },
@@ -94,13 +104,13 @@ const topProducts = [
   { name: "أقلام حبر", مبيعات: 1200, إيرادات: 18000 },
 ];
 
-const stockStatus = [
+const stockStatusRaw = [
   { name: "متوفر", value: 21, fill: "hsl(142,71%,45%)" },
   { name: "منخفض", value: 6, fill: "hsl(38,92%,50%)" },
   { name: "نفد", value: 3, fill: "hsl(0,84%,60%)" },
 ];
 
-const dailyMovements = [
+const dailyMovementsRaw = [
   { day: "السبت", وارد: 85, صادر: 62 },
   { day: "الأحد", وارد: 120, صادر: 95 },
   { day: "الاثنين", وارد: 145, صادر: 110 },
@@ -110,7 +120,7 @@ const dailyMovements = [
   { day: "الجمعة", وارد: 40, صادر: 25 },
 ];
 
-const userPerformance = [
+const userPerformanceRaw = [
   { name: "أحمد محمد", حركات: 145 },
   { name: "سارة علي", حركات: 132 },
   { name: "خالد يوسف", حركات: 98 },
