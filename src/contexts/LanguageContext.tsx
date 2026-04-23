@@ -1,12 +1,16 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { translations, Language, productNameMap, userNameMap, movementTypeMap, statusMap } from "@/i18n/translations";
 
+type T = {
+  [K in keyof (typeof translations)["ar"]]: (typeof translations)["ar"][K];
+};
+
 interface LanguageContextType {
   lang: Language;
   dir: "rtl" | "ltr";
   setLang: (l: Language) => void;
   toggle: () => void;
-  t: (typeof translations)["ar"];
+  t: T;
   // helpers translating dynamic Arabic data values
   tCategory: (v: string) => string;
   tWarehouse: (v: string) => string;
