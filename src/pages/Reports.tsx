@@ -136,69 +136,95 @@ const tooltipStyle = {
   boxShadow: "0 4px 12px rgb(0 0 0 / 0.08)",
 };
 
-const handleExportPDF = () => {
-  const printContent = document.getElementById("reports-content");
-  if (printContent) {
+const Reports = () => {
+  const { t, lang, dir, tMonth, tDay, tCategory, tWarehouse, tProduct, tUser, tStatus } = useLang();
+  const sar = lang === "ar" ? "ر.س" : "SAR";
+
+  // Translated chart datasets — keys are dynamic for proper legend/labels
+  const KIN = t.inbound;
+  const KOUT = t.outbound;
+  const KNET = t.net;
+  const KRATE = t.rate;
+  const KSALES = t.sales;
+  const KREV = t.revenue;
+  const KMOV = t.totalMovements;
+
+  const monthlyData = monthlyDataRaw.map(d => ({ month: tMonth(d.month), [KIN]: d.وارد, [KOUT]: d.صادر, [KNET]: d.صافي }));
+  const warehouseData = warehouseDataRaw.map(w => ({ name: tWarehouse(w.name), value: w.value }));
+  const categoryData = categoryDataRaw.map(c => ({ name: tCategory(c.name), value: c.value }));
+  const valueData = valueDataRaw.map(v => ({ month: tMonth(v.month), value: v.value }));
+  const turnoverData = turnoverDataRaw.map(d => ({ month: tMonth(d.month), [KRATE]: d.معدل }));
+  const radarData = radarDataRaw.map(r => ({ metric: lang === "en" ? (radarMetricMap[r.metric] ?? r.metric) : r.metric, A: r.A, fullMark: r.fullMark }));
+  const topProducts = topProductsRaw.map(p => ({ name: tProduct(p.name), [KSALES]: p.مبيعات, [KREV]: p.إيرادات }));
+  const stockStatus = stockStatusRaw.map(s => ({ name: tStatus(s.name), value: s.value, fill: s.fill }));
+  const dailyMovements = dailyMovementsRaw.map(d => ({ day: tDay(d.day), [KIN]: d.وارد, [KOUT]: d.صادر }));
+  const userPerformance = userPerformanceRaw.map(u => ({ name: tUser(u.name), [KMOV]: u.حركات }));
+
+  const handleExportCSV = () => {
+    const headers = `${t.time === "Time" ? "Month" : "الشهر"},${KIN},${KOUT},${KNET}\n`;
+    const rows = monthlyData.map(d => `${d.month},${d[KIN]},${d[KOUT]},${d[KNET]}`).join("\n");
+    const blob = new Blob(["\uFEFF" + headers + rows], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = lang === "en" ? "inventory_report.csv" : "تقرير_المخزون.csv";
+    link.click();
+    toast.success(t.csvExported);
+  };
+
+  const handleExportPDF = () => {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
+      const reportTitle = lang === "en" ? "Comprehensive Inventory Report" : "تقرير المخزون الشامل";
+      const dateLabel = lang === "en" ? "Report date" : "تاريخ التقرير";
+      const summaryLabel = lang === "en" ? "Performance Summary" : "ملخص الأداء";
+      const indicatorLabel = lang === "en" ? "Indicator" : "المؤشر";
+      const valueLabel = lang === "en" ? "Value" : "القيمة";
+      const monthLabel = lang === "en" ? "Month" : "الشهر";
+      const align = dir === "rtl" ? "right" : "left";
       printWindow.document.write(`
-        <html dir="rtl"><head><title>تقارير المخزون</title>
+        <html dir="${dir}" lang="${lang}"><head><title>${reportTitle}</title>
         <style>body{font-family:sans-serif;padding:20px}h1{text-align:center;margin-bottom:30px}
-        .chart-placeholder{border:1px solid #ddd;padding:20px;margin:15px 0;border-radius:8px;text-align:center;color:#666}
-        table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid #ddd;padding:10px;text-align:right}th{background:#f5f5f5}
-        @media print{body{margin:0}.no-print{display:none}}</style></head>
-        <body><h1>تقرير المخزون الشامل</h1><p>تاريخ التقرير: ${new Date().toLocaleDateString("ar-SA")}</p>
-        <h2>ملخص الأداء</h2>
-        <table><thead><tr><th>المؤشر</th><th>القيمة</th></tr></thead><tbody>
-        <tr><td>إجمالي المنتجات</td><td>30</td></tr>
-        <tr><td>قيمة المخزون</td><td>410,000 ر.س</td></tr>
-        <tr><td>معدل الدوران</td><td>4.8x</td></tr>
-        <tr><td>منتجات منخفضة</td><td>6</td></tr>
-        <tr><td>منتجات نافدة</td><td>3</td></tr>
+        table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid #ddd;padding:10px;text-align:${align}}th{background:#f5f5f5}
+        @media print{body{margin:0}}</style></head>
+        <body><h1>${reportTitle}</h1><p>${dateLabel}: ${new Date().toLocaleDateString(lang === "en" ? "en-US" : "ar-SA")}</p>
+        <h2>${summaryLabel}</h2>
+        <table><thead><tr><th>${indicatorLabel}</th><th>${valueLabel}</th></tr></thead><tbody>
+        <tr><td>${t.totalProducts}</td><td>30</td></tr>
+        <tr><td>${t.inventoryValue}</td><td>410,000 ${sar}</td></tr>
+        <tr><td>${t.turnoverRate}</td><td>4.8x</td></tr>
+        <tr><td>${t.lowStockCount}</td><td>6</td></tr>
+        <tr><td>${t.outOfStockCount}</td><td>3</td></tr>
         </tbody></table>
-        <h2>أعلى المنتجات مبيعاً</h2>
-        <table><thead><tr><th>المنتج</th><th>المبيعات</th><th>الإيرادات</th></tr></thead><tbody>
-        ${topProducts.map(p => `<tr><td>${p.name}</td><td>${p.مبيعات}</td><td>${p.إيرادات.toLocaleString()} ر.س</td></tr>`).join("")}
+        <h2>${t.chart9}</h2>
+        <table><thead><tr><th>${t.product}</th><th>${KSALES}</th><th>${KREV}</th></tr></thead><tbody>
+        ${topProducts.map(p => `<tr><td>${p.name}</td><td>${p[KSALES]}</td><td>${(p[KREV] as number).toLocaleString()} ${sar}</td></tr>`).join("")}
         </tbody></table>
-        <h2>حركة المخزون الشهرية</h2>
-        <table><thead><tr><th>الشهر</th><th>وارد</th><th>صادر</th><th>صافي</th></tr></thead><tbody>
-        ${monthlyData.map(d => `<tr><td>${d.month}</td><td>${d.وارد}</td><td>${d.صادر}</td><td>${d.صافي}</td></tr>`).join("")}
+        <h2>${t.chart1}</h2>
+        <table><thead><tr><th>${monthLabel}</th><th>${KIN}</th><th>${KOUT}</th><th>${KNET}</th></tr></thead><tbody>
+        ${monthlyData.map(d => `<tr><td>${d.month}</td><td>${d[KIN]}</td><td>${d[KOUT]}</td><td>${d[KNET]}</td></tr>`).join("")}
         </tbody></table>
-        <h2>توزيع الفئات</h2>
-        <table><thead><tr><th>الفئة</th><th>النسبة</th></tr></thead><tbody>
+        <h2>${t.chart4}</h2>
+        <table><thead><tr><th>${t.category}</th><th>${t.share}</th></tr></thead><tbody>
         ${categoryData.map(c => `<tr><td>${c.name}</td><td>${c.value}%</td></tr>`).join("")}
         </tbody></table>
         <script>window.print();window.close();</script></body></html>
       `);
       printWindow.document.close();
     }
-  }
-  toast.success("جاري تصدير التقرير...");
-};
+    toast.success(t.exportingReport);
+  };
 
-const handleExportCSV = () => {
-  const headers = "الشهر,وارد,صادر,صافي\n";
-  const rows = monthlyData.map(d => `${d.month},${d.وارد},${d.صادر},${d.صافي}`).join("\n");
-  const blob = new Blob(["\uFEFF" + headers + rows], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "تقرير_المخزون.csv";
-  link.click();
-  toast.success("تم تصدير ملف CSV بنجاح");
-};
-
-const Reports = () => {
   return (
     <div className="space-y-6 animate-fade-in" id="reports-content">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">التقارير</h1>
-          <p className="text-sm text-muted-foreground mt-1">تحليلات وإحصائيات مفصلة للمخزون — 12 تقرير بياني</p>
+          <h1 className="text-2xl font-semibold">{t.reports}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t.reportsSubtitle}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2"><Calendar className="h-4 w-4" />سنة كاملة</Button>
-          <Button variant="outline" className="gap-2" onClick={handleExportCSV}><FileSpreadsheet className="h-4 w-4" />تصدير CSV</Button>
-          <Button className="gap-2" onClick={handleExportPDF}><Download className="h-4 w-4" />تصدير PDF</Button>
+          <Button variant="outline" className="gap-2"><Calendar className="h-4 w-4" />{t.fullYear}</Button>
+          <Button variant="outline" className="gap-2" onClick={handleExportCSV}><FileSpreadsheet className="h-4 w-4" />{t.exportCSV}</Button>
+          <Button className="gap-2" onClick={handleExportPDF}><Download className="h-4 w-4" />{t.exportPDF}</Button>
         </div>
       </div>
 
